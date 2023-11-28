@@ -1,20 +1,45 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Button, Platform, View, useColorScheme } from "react-native";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+import "./src/config/firebase";
+import RootNavigation from "./src/navigation";
+import { useFonts } from "expo-font";
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+import colors from "./src/utils/colors";
+
+import {
+  community,
+  notifications,
+  main,
+  statistics,
+  profile,
+} from "./src/screens";
+
+import AppNavigator from "./src/components/AppNavigator";
+
+const Tab = createBottomTabNavigator();
+
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [loaded] = useFonts({});
+
+  if (!loaded) {
+    return;
+  }
+
+  return <RootNavigation />;
+
+  // return isLoggedIn ? (
+  //   <NavigationContainer>
+  //     <AppNavigator />
+  //   </NavigationContainer>
+  // ) : (
+  //   <Login onLogin={() => setIsLoggedIn(true)} />
+  // );
+};
+
+export default App;
