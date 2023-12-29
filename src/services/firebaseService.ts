@@ -1,4 +1,11 @@
-import { getDatabase, ref, onValue, set, get } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  set,
+  get,
+  runTransaction,
+} from "firebase/database";
 
 interface UserParams {
   email: string;
@@ -71,4 +78,18 @@ export const fetchPosts = (callback: Function) => {
 export const updatePostById = (postId: string, updatedData: any) => {
   const postRef = ref(db, `posts/${postId}`);
   set(postRef, updatedData);
+};
+
+export const incrementWin = (userId: number) => {
+  const db = getDatabase();
+  const userRef = ref(db, `games/${userId}/win`);
+
+  runTransaction(userRef, (currentWins) => {
+    // If currentWins has never been set, initialize it to 0.
+    if (currentWins === null) {
+      return 1;
+    } else {
+      return currentWins + 1;
+    }
+  });
 };
