@@ -33,10 +33,10 @@ const PostComponent: React.FC<{ postId: string; postInfo: Post }> = ({
     <Image source={{ uri: postInfo.photo }} style={styles.postPhoto} />
     <View style={styles.desc}>
       <Text>{postInfo.comment}</Text>
-      <View style={styles.likes}>
-        <Text>{postInfo.likes}</Text>
-        <Ionicons name="md-heart-outline" size={24} color="black" />
-      </View>
+      {/* <View style={styles.likes}> */}
+      {/* <Text>{postInfo.likes}</Text> */}
+      {/* <Ionicons name="md-heart-outline" size={24} color="black" /> */}
+      {/* </View> */}
     </View>
   </View>
 );

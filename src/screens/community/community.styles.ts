@@ -5,7 +5,7 @@ const styles = StyleSheet.create({
   postBlock: {
     flex: 1,
     backgroundColor: colors.postBlock,
-    height: 500,
+    height: 400,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 1 },
@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
   desc: {
     padding: 16,
     gap: 10,
+    alignItems: "center",
   },
   likes: {
     flexDirection: "row",

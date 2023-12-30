@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  StyleSheet,
   ActivityIndicator,
   Text,
   SafeAreaView,
   Modal,
   Button,
-  TextInput,
+  Image,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
-import polyline from "@mapbox/polyline";
-import { incrementWin } from "../../services/firebaseService";
 
+import {
+  incrementWin,
+  addNewPost,
+  fetchUserById,
+} from "../../services/firebaseService";
+
+import MapView, { Marker, Polyline } from "react-native-maps";
+import * as Location from "expo-location";
+import polyline from "@mapbox/polyline";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { GlobalStyles, RoundButton } from "@components";
-
+import { GlobalStyles, RoundButton, UserType } from "@components";
+import { calculateDistance, calculateNewLocation } from "./main.utils";
 import colors from "../../utils/colors";
-
-import * as Location from "expo-location";
+import styles from "./main.styles";
 
 export default function App() {
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -30,48 +34,13 @@ export default function App() {
   const [distance, setDistance] = useState(0);
   const [score, setScore] = useState(0);
   const [showPostCreation, setShowPostCreation] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const [isStarted, setIsStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
   const USER_ID = 1;
-
-  function calculateNewLocation(lat, lon, distance, bearing) {
-    const EarthRadius = 6371; // Earth's radius in kilometers
-    const dR = distance / 1000 / EarthRadius; // Convert distance to radians
-    const latitude1 = (lat * Math.PI) / 180; // Convert latitude to radians
-    const longitude1 = (lon * Math.PI) / 180; // Convert longitude to radians
-
-    const newLatitude = Math.asin(
-      Math.sin(latitude1) * Math.cos(dR) +
-        Math.cos(latitude1) * Math.sin(dR) * Math.cos(bearing)
-    );
-    const newLongitude =
-      longitude1 +
-      Math.atan2(
-        Math.sin(bearing) * Math.sin(dR) * Math.cos(latitude1),
-        Math.cos(dR) - Math.sin(latitude1) * Math.sin(newLatitude)
-      );
-
-    return {
-      latitude: (newLatitude * 180) / Math.PI,
-      longitude: (newLongitude * 180) / Math.PI,
-    };
-  }
-
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Radius of the Earth in km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c * 1000; // Distance in meters
-  };
+  const winPoints = 2;
 
   const startGame = async () => {
     setIsStarted(true);
@@ -257,8 +226,8 @@ export default function App() {
       transparent={true}
       onRequestClose={() => setGameOver(false)}
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
+      <View style={GlobalStyles.centeredView}>
+        <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
           <Text style={styles.modalText}>You Win!</Text>
           <Button title="Create Post" onPress={handleCreatePost} />
         </View>
@@ -272,15 +241,13 @@ export default function App() {
       transparent={true}
       onRequestClose={() => setShowPostCreation(false)}
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
+      <View style={GlobalStyles.centeredView}>
+        <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
           <Text>I scored {score} points!</Text>
-          {/* <Image
-            source={{ uri: "random_map_image_url" }}
+          <Image
+            source={{ uri: "https://picsum.photos/00" }}
             style={styles.mapImage}
-          /> */}
-          {/* Replace 'random_map_image_url' with your image URL */}
-          <TextInput style={styles.textInput} placeholder="Add a caption..." />
+          />
           <Button title="Publish" onPress={handlePublish} />
         </View>
       </View>
@@ -288,7 +255,7 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (score === 2) {
+    if (score === winPoints) {
       setGameOver(true);
       incrementWin(USER_ID);
     }
@@ -299,6 +266,21 @@ export default function App() {
   };
 
   const handlePublish = () => {
+    const user = fetchUserById(USER_ID, (userData) => {
+      if (userData) {
+        setUserData(userData);
+      }
+    });
+    console.log(userData);
+
+    const newPost = {
+      who: userData.userName,
+      comment: `I scored ${score} points!`,
+      photo: "https://picsum.photos/00",
+      likes: 0,
+    };
+
+    addNewPost(newPost);
     // Logic to handle post publishing
     setShowPostCreation(false);
     restartGame();
@@ -320,13 +302,13 @@ export default function App() {
       ) : (
         isStarted && (
           <View style={styles.container}>
-            <View style={styles.topBar}>
-              <View style={styles.box}></View>
-              <View style={styles.box}>
-                <Text style={styles.distanceText}>{distance.toFixed(0)} m</Text>
+            <View style={styles.gameTopBar}>
+              <View style={GlobalStyles.box}></View>
+              <View style={GlobalStyles.box}>
+                <Text style={{ fontSize: 20 }}>{distance.toFixed(0)} m</Text>
               </View>
-              <View style={styles.box}>
-                <Text style={styles.messageText}>
+              <View style={GlobalStyles.box}>
+                <Text style={{ fontSize: 20 }}>
                   <Text>
                     <MaterialCommunityIcons
                       name={scoreToDisplay}
@@ -365,9 +347,8 @@ export default function App() {
       {renderGameOverModal()}
       {renderPostCreationModal()}
       {!isStarted && (
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            {/* <Text style={styles.modalText}>You Win!</Text> */}
+        <View style={GlobalStyles.centeredView}>
+          <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
             <RoundButton
               onPress={startGame}
               title="Start Game"
@@ -376,108 +357,7 @@ export default function App() {
             />
           </View>
         </View>
-        // <Button title="Start Game" onPress={startGame} /> // Add the Start Button
       )}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "stretch",
-  },
-  topBar: {
-    marginTop: 26,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 6,
-    backgroundColor: "rgba(165, 90, 214, 0.3)",
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-  },
-  box: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 5,
-    marginHorizontal: 2,
-  },
-  map: {
-    flex: 1,
-    width: "100%",
-  },
-  distanceText: {
-    fontSize: 20,
-    color: "black",
-  },
-  messageText: {
-    fontSize: 20,
-    color: "black",
-  },
-  radius: {
-    height: 40,
-    width: 40,
-    borderRadius: 25,
-    overflow: "hidden",
-    backgroundColor: "rgba(156, 69, 214, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(165, 90, 214, 0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  marker: {
-    height: 20,
-    width: 20,
-    borderWidth: 3,
-    borderColor: "white",
-    borderRadius: 10,
-    backgroundColor: "#9c45d6",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    // alignItems: "center",
-  },
-  modalView: {
-    margin: 40,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(165, 90, 214, 0.3)",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontSize: 24,
-  },
-  mapImage: {
-    width: 200,
-    height: 100,
-    marginBottom: 15,
-  },
-  textInput: {
-    height: 40,
-    width: "100%",
-    borderColor: "gray",
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 15,
-  },
-});

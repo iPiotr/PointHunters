@@ -28,6 +28,17 @@ const GlobalStyles = StyleSheet.create({
     height: 50,
     borderRadius: 50,
   },
+  box: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 5,
+    marginHorizontal: 2,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+  },
 });
 
 export default GlobalStyles;

@@ -13,6 +13,13 @@ interface UserParams {
   lastName: string;
 }
 
+type Post = {
+  who: string | any;
+  comment: string;
+  photo: string;
+  likes: number;
+};
+
 const db = getDatabase();
 
 // User-related functions
@@ -81,7 +88,6 @@ export const updatePostById = (postId: string, updatedData: any) => {
 };
 
 export const incrementWin = (userId: number) => {
-  const db = getDatabase();
   const userRef = ref(db, `games/${userId}/win`);
 
   runTransaction(userRef, (currentWins) => {
@@ -92,4 +98,24 @@ export const incrementWin = (userId: number) => {
       return currentWins + 1;
     }
   });
+};
+
+export const addNewPost = async (postData: Post) => {
+  const postsRef = ref(db, "posts");
+
+  const snapshot = await get(postsRef);
+  let maxId = 0;
+
+  // Find the max ID
+  snapshot.forEach((childSnapshot) => {
+    const id = childSnapshot.val().id;
+    if (id > maxId) {
+      maxId = id;
+    }
+  });
+
+  // Increment the ID for the new post
+  const newId = maxId + 1;
+  const newPostRef = ref(db, `posts/${newId}`);
+  set(newPostRef, { ...postData, id: newId });
 };
