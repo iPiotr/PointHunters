@@ -6,7 +6,7 @@ import styles from "./profileCard.styles";
 
 import { GlobalStyles } from "@components";
 
-const randomImageUrl = "https://picsum.photos/00";
+const randomImageUrl = "https://picsum.photos/000";
 
 const Profile: React.FC = ({ navigation }) => {
   return (

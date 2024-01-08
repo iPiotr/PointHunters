@@ -19,26 +19,22 @@ import {
   ProfileOptionsProps,
   FullScreenModalProps,
 } from "@components";
+
 import {
-  sendEmailVerification,
-  signOut,
-  updateEmail,
-  updatePassword,
-  updateProfile,
-} from "firebase/auth";
-import { auth } from "../../config/firebase";
-import useAuth from "../../FirebaseAuth/useAuth";
-import {
+  fetchAchievements,
+  fetchRewards,
   fetchUserById,
   updateUserById,
   updateNameById,
 } from "../../services/firebaseService";
+import useAuth from "../../FirebaseAuth/useAuth";
+import { signOut, updateProfile, updateEmail } from "firebase/auth";
+import { auth } from "../../config/firebase";
 
 type ValidIconNames =
   | "md-settings"
   | "ribbon"
-  | "help-circle"
-  | "log-out"
+  | "md-help-sharp"
   | "arrow-forward";
 
 interface OptionButtonProps {
@@ -47,73 +43,75 @@ interface OptionButtonProps {
   onPress: () => void;
 }
 
-const EditField = ({ label, value, onChangeText, onSave, onCancel }) => (
-  <View style={styles.editRow}>
-    <Text style={{ fontSize: 22, fontWeight: "bold" }}>{label}</Text>
-    <TextInput
-      value={value}
-      onChangeText={onChangeText}
-      style={styles.changeInput}
-    />
-    <Ionicons
-      name="save-outline"
-      size={28}
-      color={colors.black}
-      onPress={onSave}
-    />
-    <Ionicons
-      name="close-circle"
-      size={28}
-      color={colors.black}
-      onPress={onCancel}
-    />
-  </View>
-);
-
-const SettingTitle = ({ title, onPress }) => (
-  <View style={styles.editRow}>
-    <Text style={{ fontSize: 22, fontWeight: "bold" }} onPress={onPress}>
-      {title}
-    </Text>
-    <Ionicons name="arrow-back" size={28} color="black" onPress={onPress} />
-  </View>
-);
+const RANDOM_IMAGE_URL = "https://picsum.photos/000";
+const USER_ID = 1;
 
 const FullScreenModal: React.FC<FullScreenModalProps> = ({
   content,
   isVisible,
   onClose,
   setFullScreenVisible,
-  editedName,
-  setEditedName,
   isEditingName,
-  setIsEditingName,
   isEditingEmail,
-  setIsEditingEmail,
   isEditingPassword,
+  isEditingPhoto,
+  setIsEditingName,
+  setIsEditingEmail,
   setIsEditingPassword,
-  handleSave,
-  editedEmail,
-  setEditedEmail,
-  editedPassword,
-  setEditedPassword,
+  setIsEditingPhoto,
+  isEditing,
+  setIsEditing,
+  editedName, // Receive editedName
+  setEditedName, // Receive setEditedName
+  handleSaveName,
 }) => {
   const { user } = useAuth();
+
+  const SettingTitle = ({ title, onPress }) => (
+    <View style={styles.editRow}>
+      <Text style={{ fontSize: 22, fontWeight: "bold" }} onPress={onPress}>
+        {title}
+      </Text>
+      <Ionicons name="arrow-back" size={28} color="black" onPress={onPress} />
+    </View>
+  );
+
+  const EditField = ({ label, value, onChangeText, onSave, onCancel }) => (
+    <View style={styles.editRow}>
+      <Text style={{ fontSize: 22, fontWeight: "bold" }}>{label}</Text>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        style={styles.changeInput}
+      />
+      <Ionicons
+        name="save-outline"
+        size={28}
+        color={colors.black}
+        onPress={onSave}
+      />
+      <Ionicons
+        name="close-circle"
+        size={28}
+        color={colors.black}
+        onPress={onCancel}
+      />
+    </View>
+  );
 
   const renderContent = (content) => {
     switch (content) {
       case "Account settings":
+        // console.log(user);
         return (
           <View>
+            {/* Name Editing Section */}
             {isEditingName ? (
               <EditField
-                label=""
+                label="Change Name"
                 value={editedName}
                 onChangeText={setEditedName}
-                onSave={() => {
-                  handleSave(editedName, "name");
-                  setIsEditingName(false);
-                }}
+                onSave={() => handleSaveName()}
                 onCancel={() => setIsEditingName(false)}
               />
             ) : (
@@ -123,15 +121,13 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
               />
             )}
 
+            {/* Email Editing Section */}
             {isEditingEmail ? (
               <EditField
-                label=""
+                label="Change Email"
                 value={editedEmail}
                 onChangeText={setEditedEmail}
-                onSave={() => {
-                  handleSave(editedEmail, "email");
-                  setIsEditingEmail(false);
-                }}
+                onSave={() => handleSave("email")}
                 onCancel={() => setIsEditingEmail(false)}
               />
             ) : (
@@ -141,15 +137,13 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
               />
             )}
 
+            {/* Password Editing Section */}
             {isEditingPassword ? (
               <EditField
-                label=""
+                label="Change Password"
                 value={editedPassword}
                 onChangeText={setEditedPassword}
-                onSave={() => {
-                  handleSave(editedPassword, "password");
-                  setIsEditingPassword(false);
-                }}
+                onSave={() => handleSave("password")}
                 onCancel={() => setIsEditingPassword(false)}
               />
             ) : (
@@ -160,38 +154,25 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
             )}
           </View>
         );
+
+        break;
       case "Account card":
-        return (
-          <View>
-            <Image
-              source={user ? { uri: user.photoURL } : "Loading..."}
-              style={GlobalStyles.profilePhoto}
-            />
-            <Text>Total Hunts:</Text>
-          </View>
-        );
+        // return content for Account card
+        break;
       case "Help Center":
         return (
           <Button
-            onPress={() => Linking.openURL("mailto:support@example.com")}
-            title="Contact Support"
-            color={colors.primary}
+            onPress={() => Linking.openURL("mailto:ip.starzec@gmail.com")}
+            title="settingsScreen.submitFeedback"
+            color={"red"}
           />
         );
+        break;
       case "Logout":
-        return (
-          <Button
-            onPress={() => signOut(auth)}
-            title="Logout"
-            color={colors.danger}
-          />
-        );
+        // return content for Logout
+        break;
       default:
-        return (
-          <View>
-            <Text>Content not found</Text>
-          </View>
-        );
+      // return some default content or null
     }
   };
 
@@ -212,7 +193,12 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
           onPress={(e) => e.stopPropagation()}
           style={styles.modalContent}
         >
+          {/* <Text>{content}</Text> */}
           {renderContent(content)}
+
+          <TouchableOpacity onPress={() => setFullScreenVisible(false)}>
+            {/* <Text>Close</Text> */}
+          </TouchableOpacity>
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
@@ -252,7 +238,6 @@ const ProfileOptions: React.FC<ProfileOptionsProps> = ({
   const handleLogout = async () => {
     await signOut(auth);
   };
-
   return (
     <View style={styles.settingsContainer}>
       <Text style={styles.options}>Options</Text>
@@ -273,15 +258,18 @@ const ProfileOptions: React.FC<ProfileOptionsProps> = ({
         }}
       />
       <OptionButton
-        iconName="help-circle"
-        label="Contact Support"
-        onPress={() => Linking.openURL("mailto:ip.starzec@gmail..com")}
-        // onPress={() => {
-        //   setSelectedContent("Help Center");
-        //   setFullScreenVisible(true);
-        // }}
+        iconName="md-help-sharp"
+        label="Help Center"
+        onPress={() => {
+          setSelectedContent("Help Center");
+          setFullScreenVisible(true);
+        }}
       />
-      <OptionButton iconName="log-out" label="Log out" onPress={handleLogout} />
+      <OptionButton
+        iconName="md-help-sharp"
+        label="Logout"
+        onPress={handleLogout}
+      />
     </View>
   );
 };
@@ -292,12 +280,13 @@ const Profile: React.FC = () => {
   const [userData, setUser] = useState<UserType | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const [editedEmail, setEditedEmail] = useState("");
-  const [editedPassword, setEditedPassword] = useState("");
+  const [editedLastName, setEditedLastName] = useState("");
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [editedEmail, setEditedEmail] = useState("");
+  const [editedPassword, setEditedPassword] = useState("");
 
   const { user } = useAuth();
 
@@ -313,25 +302,11 @@ const Profile: React.FC = () => {
     }
   }, []);
 
-  const handleSave = async (value, type) => {
-    console.log(type);
-    console.log(value);
-
+  const handleSaveName = async () => {
     try {
-      if (type === "name") {
-        await updateProfile(user, {
-          displayName: value,
-        });
-      } else if (type === "email") {
-        try {
-          // await updateEmail(user, value);
-          await sendEmailVerification(user);
-        } catch (error) {
-          console.error("Error sending verification email:", error);
-        }
-      } else if (type === "password") {
-        await updatePassword(user, value);
-      }
+      await updateProfile(user, {
+        displayName: editedName,
+      });
 
       setIsEditing(false);
       console.log("User profile updated:", user.displayName);
@@ -339,9 +314,13 @@ const Profile: React.FC = () => {
       console.error("Error update user:", error);
     }
 
-    console.log(user);
-
     updateNameById(user.uid, editedName);
+  };
+
+  const handleSaveMail = async () => {
+    try {
+      await updateEmail(user, newMail);
+    } catch (error) {}
   };
 
   return (
@@ -351,19 +330,10 @@ const Profile: React.FC = () => {
         isVisible={isFullScreenVisible}
         onClose={() => setFullScreenVisible(false)}
         setFullScreenVisible={setFullScreenVisible}
-        isEditingName={isEditingName} // Pass the state
-        setIsEditingName={setIsEditingName} // Pass the setter
-        isEditingEmail={isEditingEmail} // Similarly for email
-        setIsEditingEmail={setIsEditingEmail} // And its setter
-        isEditingPassword={isEditingPassword} // Similarly for password
-        setIsEditingPassword={setIsEditingPassword} // And its setter
-        editedName={editedName}
-        editedEmail={editedEmail}
-        editedPassword={editedPassword}
-        setEditedName={setEditedName}
-        setEditedEmail={setEditedEmail}
-        setEditedPassword={setEditedPassword}
-        handleSave={handleSave}
+        setIsEditing={setIsEditing}
+        editedName={editedName} // Pass editedName
+        setEditedName={setEditedName} // Pass setEditedName
+        handleSaveName={handleSaveName}
         isEditing={isEditing}
       />
 
@@ -372,14 +342,10 @@ const Profile: React.FC = () => {
         <Text style={{ fontSize: 22 }}>Profile</Text>
       </View>
       <View style={styles.title}>
-        {user && user.photoURL ? (
-          <Image
-            source={{ uri: user.photoURL }}
-            style={GlobalStyles.profilePhoto}
-          />
-        ) : (
-          <Text>Loading...</Text> // Display a text or a placeholder image when loading
-        )}
+        <Image
+          source={user ? { uri: user.photoURL } : "Loading..."}
+          style={GlobalStyles.profilePhoto}
+        />
         <Text style={{ fontSize: 22, fontWeight: "bold" }}>
           {user ? `${user.displayName}` : "Loading..."}
         </Text>

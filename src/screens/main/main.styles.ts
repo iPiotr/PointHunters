@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import colors from "../../utils/colors";
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -16,7 +17,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 6,
-    backgroundColor: "rgba(165, 90, 214, 0.3)",
+    backgroundColor: colors.lightPrimary,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     fontSize: 20,
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "rgba(156, 69, 214, 0.1)",
     borderWidth: 1,
-    borderColor: "rgba(165, 90, 214, 0.3)",
+    borderColor: colors.lightPrimary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -45,13 +46,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#9c45d6",
   },
   modalView: {
+    position: "relative",
     margin: 40,
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(165, 90, 214, 0.3)",
+    borderColor: colors.lightPrimary,
   },
   modalText: {
     marginBottom: 15,
@@ -70,6 +72,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     marginBottom: 15,
+  },
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    marginTop: 26,
+  },
+  input: {
+    width: "90%",
+    paddingVertical: 12,
+    textAlign: "center",
+    borderWidth: 0.3,
+    backgroundColor: colors.background,
+    borderRadius: 50,
+    marginVertical: 10,
+  },
+  closeIcon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  createButton: {
+    backgroundColor: colors.lightPrimary,
+    fontSize: 18,
+    fontWeight: "bold",
+    padding: 8,
+    borderRadius: 10,
   },
 });
 

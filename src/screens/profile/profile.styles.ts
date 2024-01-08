@@ -9,10 +9,27 @@ const styles = StyleSheet.create({
   title: {
     backgroundColor: colors.background,
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "flex-start",
+    paddingLeft: 20,
+    gap: 20,
     alignItems: "center",
     width: "100%",
     paddingVertical: 10,
+  },
+  nameEdit: {
+    // backgroundColor: colors.background,
+    flexDirection: "column",
+    justifyContent: "center",
+    gap: 10,
+    alignItems: "center",
+    width: "100%",
+  },
+  editRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 14,
   },
   settingsContainer: {
     alignItems: "center",
@@ -52,7 +69,10 @@ const styles = StyleSheet.create({
   changeInput: {
     borderWidth: 1,
     borderRadius: 10,
-    padding: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    width: "60%",
+    fontSize: 18,
   },
 });
 

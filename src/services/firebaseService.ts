@@ -36,23 +36,28 @@ export const updateUserById = (userId: number, updatedData: any) => {
   set(userRef, updatedData);
 };
 
+export const updateNameById = async ({ uid, name }) => {
+  const newUserRef = ref(db, `users/${uid}`);
+  await set(newUserRef, {
+    name,
+  });
+};
+
 export const addUserToDatabase = async ({
   email,
-  name,
-  lastName,
-}: UserParams) => {
-  const usersRef = ref(db, "users");
-  let lastId = 0;
-
-  // Fetch the last user's ID
-  const snapshot = await get(usersRef);
-  const users = snapshot.val();
-  if (users) {
-    lastId = Math.max(...Object.keys(users).map(Number));
-  }
-
-  const newUserRef = ref(db, `users/${lastId + 1}`);
-  set(newUserRef, { id: lastId + 1, email, name, lastName });
+  displayName,
+  uid,
+  huntTimes,
+  pointsCollected,
+}) => {
+  const newUserRef = ref(db, `users/${uid}`);
+  await set(newUserRef, {
+    id: uid,
+    email,
+    displayName,
+    huntTimes,
+    pointsCollected,
+  });
 };
 
 // Achievements-related functions
@@ -74,12 +79,20 @@ export const fetchRewards = (callback: Function) => {
 };
 
 // Posts-related functions
-export const fetchPosts = (callback: Function) => {
+export const fetchPosts = async () => {
   const postsRef = ref(db, "posts");
-  return onValue(postsRef, (snapshot) => {
-    const data = snapshot.val();
-    callback(data);
-  });
+  try {
+    const snapshot = await get(postsRef);
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 export const updatePostById = (postId: string, updatedData: any) => {
@@ -88,7 +101,7 @@ export const updatePostById = (postId: string, updatedData: any) => {
 };
 
 export const incrementWin = (userId: number) => {
-  const userRef = ref(db, `games/${userId}/win`);
+  const userRef = ref(db, `users/${userId}/huntTimes`);
 
   runTransaction(userRef, (currentWins) => {
     // If currentWins has never been set, initialize it to 0.

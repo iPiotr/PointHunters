@@ -12,7 +12,7 @@ import {
   Rewards,
 } from "@components";
 
-const randomImageUrl = "https://picsum.photos/00";
+const randomImageUrl = "https://picsum.photos/000";
 
 const like1 = {
   who: "piotr.s",
@@ -65,8 +65,7 @@ const Notifications: React.FC = () => {
             >
               <Ionicons name="md-heart-sharp" size={24} color="red" />
               <Text>
-                <Text style={{ fontWeight: "bold" }}>{like.who}</Text>{" "}
-                {like.text}
+                <Text style={{ fontWeight: "bold" }}> You got achievement</Text>{" "}
               </Text>
               <Image source={{ uri: like.photo }} style={styles.postPhoto} />
             </View>

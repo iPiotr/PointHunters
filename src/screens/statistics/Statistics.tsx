@@ -19,12 +19,14 @@ import {
   fetchRewards,
   fetchUserById,
 } from "../../services/firebaseService";
+import useAuth from "../../FirebaseAuth/useAuth";
+
 import styles from "./statistics.styles";
-
 import { AchievementsModal, RewardsModal, UserType } from "@components";
-const userID = 1;
 
-const RANDOM_IMAGE_URL = "https://picsum.photos/00";
+const userID = "pmEy3HB1SHO1y4MYRAShSZ4cmWC2";
+
+const RANDOM_IMAGE_URL = "https://picsum.photos/0";
 const screenWidth = Dimensions.get("window").width;
 const contentWidth = screenWidth * 0.9;
 
@@ -34,26 +36,30 @@ const Statistics: React.FC = () => {
   const [isAchievementsModalVisible, setAchievementsModalVisible] =
     useState(false);
   const [isRewardsModalVisible, setRewardsModalVisible] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
+  const [userData, setUser] = useState<UserType | null>(null);
+  const { user } = useAuth();
 
-  const firstFourAchievements = Object.values(achievements).slice(0, 4);
-  const remainingAchievements = Object.values(achievements).slice(4);
+  // const firstFourAchievements = Object.values(achievements).slice(0, 4);
+  // const remainingAchievements = Object.values(achievements).slice(4);
 
   useEffect(() => {
-    const unsubscribeAchievements = fetchAchievements(setAchievements);
-    const unsubscribeRewards = fetchRewards(setRewards);
-    const user = fetchUserById(userID, (userData: UserType | null) => {
-      if (userData) {
-        setUser(userData);
-      }
-    });
+    if (user && user.uid) {
+      // Check if user is not null and has a uid
+      const unsubscribeAchievements = fetchAchievements(setAchievements);
+      const unsubscribeRewards = fetchRewards(setRewards);
+      const userData = fetchUserById(user.uid, (userData: UserType | null) => {
+        if (userData) {
+          setUser(userData);
+        }
+      });
 
-    return () => {
-      unsubscribeAchievements();
-      unsubscribeRewards();
-      user;
-    };
-  }, []);
+      return () => {
+        unsubscribeAchievements();
+        unsubscribeRewards();
+        userData; // This looks like a leftover line. Ensure you correctly handle unsubscription or cleanup.
+      };
+    }
+  }, [user]);
 
   return (
     <View style={GlobalStyles.container}>
@@ -69,12 +75,16 @@ const Statistics: React.FC = () => {
       />
 
       <View style={[GlobalStyles.topBar, styles.topBarSpec]}>
-        <Image
-          source={{ uri: RANDOM_IMAGE_URL }}
-          style={GlobalStyles.profilePhoto}
-        />
+        {user && user.photoURL ? (
+          <Image
+            source={{ uri: user.photoURL }}
+            style={GlobalStyles.profilePhoto}
+          />
+        ) : (
+          <Text>Loading...</Text> // Display a text or a placeholder image when loading
+        )}
         <Text style={{ fontSize: 22, fontWeight: "bold" }}>
-          Hello, {user ? `${user.name}` : "Loading..."}
+          Hello, {user ? `${user.displayName}` : "Loading..."}
         </Text>
       </View>
 

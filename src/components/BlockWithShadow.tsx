@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import colors from "../utils/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-let randomImageUrl = "https://picsum.photos/00";
+let randomImageUrl = "https://picsum.photos/000";
 
 type Props = {
   width: number | string;

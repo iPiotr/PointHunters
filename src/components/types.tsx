@@ -33,6 +33,7 @@ export type ProfileOptionsProps = {
   isFullScreenVisible: boolean;
   setFullScreenVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedContent: React.Dispatch<React.SetStateAction<string>>;
+  auth: any;
 };
 
 export type FullScreenModalProps = {
@@ -40,13 +41,15 @@ export type FullScreenModalProps = {
   isVisible: boolean;
   onClose: () => void;
   setFullScreenVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsEditing: any;
 };
 
 export type Credentials = {
-  name: string;
-  lastName: string;
+  displayName: string;
   email: string;
   password: string;
+  pointsCollected: string;
+  huntTimes: string;
   error: string;
   [key: string]: string; // This is the index signature
 };

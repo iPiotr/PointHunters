@@ -9,6 +9,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+    marginTop: 30,
   },
   container: {
     flex: 1,
@@ -52,10 +53,17 @@ const styles = StyleSheet.create({
     width: buttonWidth,
     paddingVertical: 12,
     textAlign: "center",
-    borderWidth: 1,
+    borderWidth: 0.3,
     backgroundColor: colors.background,
     borderRadius: 50,
     marginVertical: 10,
+  },
+  icon: {
+    position: "absolute",
+    top: 36,
+    right: 16,
+    height: "100%",
+    justifyContent: "center",
   },
 });
 

@@ -4,7 +4,9 @@ import { GlobalStyles, BlockWithShadow } from "@components";
 import styles from "../screens/statistics/statistics.styles";
 import { Reward } from "./types";
 
-const randomImageUrl = "https://picsum.photos/00";
+// console.log(user);
+
+const randomImageUrl = "https://picsum.photos/000";
 
 const RewardItem: React.FC<{ reward: Reward }> = ({ reward }) => (
   <BlockWithShadow

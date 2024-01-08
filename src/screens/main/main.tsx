@@ -7,6 +7,8 @@ import {
   Modal,
   Button,
   Image,
+  ImageBackground,
+  TextInput,
 } from "react-native";
 
 import {
@@ -25,6 +27,8 @@ import { calculateDistance, calculateNewLocation } from "./main.utils";
 import colors from "../../utils/colors";
 import styles from "./main.styles";
 
+import useAuth from "../../FirebaseAuth/useAuth";
+
 export default function App() {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -35,14 +39,22 @@ export default function App() {
   const [score, setScore] = useState(0);
   const [showPostCreation, setShowPostCreation] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [distanceBetweenPoints, setDistanceBetweenPoints] = useState(200);
+  const [pointsAmount, setPointsAmounts] = useState(2);
 
   const [isStarted, setIsStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
   const USER_ID = 1;
-  const winPoints = 2;
+
+  const { user } = useAuth();
 
   const startGame = async () => {
+    console.log(distanceBetweenPoints);
+    console.log(pointsAmount);
+    setDistanceBetweenPoints(distanceBetweenPoints);
+    setPointsAmounts(pointsAmount);
+
     setIsStarted(true);
     // Any additional logic to start the game, e.g., setting up location tracking
   };
@@ -149,7 +161,7 @@ export default function App() {
           const newEndCoords = calculateNewLocation(
             currentLocation.coords.latitude,
             currentLocation.coords.longitude,
-            200,
+            distanceBetweenPoints,
             Math.random() * 2 * Math.PI
           );
           setEndCoordinate(newEndCoords); // Set new end coordinates
@@ -229,7 +241,16 @@ export default function App() {
       <View style={GlobalStyles.centeredView}>
         <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
           <Text style={styles.modalText}>You Win!</Text>
-          <Button title="Create Post" onPress={handleCreatePost} />
+          <Text style={styles.createButton} onPress={handleCreatePost}>
+            Create Post
+          </Text>
+          <MaterialCommunityIcons
+            name="close-circle-outline"
+            size={36}
+            color="black"
+            onPress={() => restartGame()}
+            style={styles.closeIcon}
+          />
         </View>
       </View>
     </Modal>
@@ -245,7 +266,7 @@ export default function App() {
         <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
           <Text>I scored {score} points!</Text>
           <Image
-            source={{ uri: "https://picsum.photos/00" }}
+            source={{ uri: "https://picsum.photos/000" }}
             style={styles.mapImage}
           />
           <Button title="Publish" onPress={handlePublish} />
@@ -255,9 +276,9 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (score === winPoints) {
+    if (score === pointsAmount) {
       setGameOver(true);
-      incrementWin(USER_ID);
+      incrementWin(user.uid);
     }
   }, [score]);
 
@@ -266,24 +287,19 @@ export default function App() {
   };
 
   const handlePublish = () => {
-    const user = fetchUserById(USER_ID, (userData) => {
-      if (userData) {
-        setUserData(userData);
-      }
-    });
-    console.log(userData);
+    if (user) {
+      const newPost = {
+        who: user.displayName,
+        comment: `I scored ${score} points!`,
+        photo: "https://picsum.photos/000",
+        likes: 0,
+      };
 
-    const newPost = {
-      who: userData.userName,
-      comment: `I scored ${score} points!`,
-      photo: "https://picsum.photos/00",
-      likes: 0,
-    };
-
-    addNewPost(newPost);
-    // Logic to handle post publishing
-    setShowPostCreation(false);
-    restartGame();
+      addNewPost(newPost);
+      // Logic to handle post publishing
+      setShowPostCreation(false);
+      restartGame();
+    }
   };
 
   const restartGame = () => {
@@ -298,7 +314,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="small" color="#fff" />
       ) : (
         isStarted && (
           <View style={styles.container}>
@@ -347,16 +363,37 @@ export default function App() {
       {renderGameOverModal()}
       {renderPostCreationModal()}
       {!isStarted && (
-        <View style={GlobalStyles.centeredView}>
-          <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
-            <RoundButton
-              onPress={startGame}
-              title="Start Game"
-              buttonWidth={200}
-              backgroundColor={colors.secondary}
-            />
+        <ImageBackground
+          source={require("@assets/background.png")}
+          style={styles.background}
+        >
+          <View style={GlobalStyles.centeredView}>
+            <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
+              <Text>Distance between points (m)</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={(text) => setDistanceBetweenPoints(Number(text))}
+                value={String(distanceBetweenPoints)}
+                keyboardType="numeric"
+                placeholder="Enter distance between points"
+              />
+              <Text>Points to earn</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={(text) => setPointsAmounts(Number(text))}
+                value={String(pointsAmount)}
+                keyboardType="numeric"
+                placeholder="Enter points amount"
+              />
+              <RoundButton
+                onPress={startGame}
+                title="Start Game"
+                buttonWidth={200}
+                backgroundColor={colors.secondary}
+              />
+            </View>
           </View>
-        </View>
+        </ImageBackground>
       )}
     </SafeAreaView>
   );

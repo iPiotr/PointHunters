@@ -5,13 +5,16 @@ import {
   View,
   ImageBackground,
   Dimensions,
+  TouchableOpacity,
+  Text,
 } from "react-native";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { StackScreenProps } from "@react-navigation/stack";
 
 import styles from "./singIn.styles";
 import colors from "../../utils/colors";
-import { RoundButton } from "@components";
+import { BlockWithShadow, GlobalStyles, RoundButton } from "@components";
+import { Ionicons } from "@expo/vector-icons";
 
 const screenWidth = Dimensions.get("window").width;
 const buttonWidth = screenWidth * 0.9;
@@ -31,6 +34,8 @@ function SignInScreen({ navigation }: SignInScreenProps) {
     password: "",
     error: "",
   });
+
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const signIn = async () => {
     const { email, password } = credentials;
@@ -62,49 +67,64 @@ function SignInScreen({ navigation }: SignInScreenProps) {
   };
 
   return (
-    <ImageBackground
-      source={require("@assets/background.png")}
-      style={styles.background}
-    >
-      <View style={styles.container}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("@assets/logo_transparent.png")}
-            style={styles.image}
-          />
+    <View style={GlobalStyles.container}>
+      <ImageBackground
+        source={require("@assets/background.png")}
+        style={styles.background}
+      >
+        <View style={styles.container}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("@assets/logo_transparent.png")}
+              style={styles.image}
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Email"
+                value={credentials.email}
+                onChangeText={(text) =>
+                  setCredentials({ ...credentials, email: text.trimEnd() })
+                }
+                style={[styles.input, GlobalStyles.topBarShadow]}
+              />
+
+              <TextInput
+                placeholder="Password"
+                onChangeText={(text) =>
+                  setCredentials({ ...credentials, password: text })
+                }
+                secureTextEntry={!passwordVisible}
+                style={[styles.input, GlobalStyles.topBarShadow]}
+              />
+              <TouchableOpacity
+                onPress={() => setPasswordVisible(!passwordVisible)}
+                style={styles.icon}
+              >
+                <Ionicons
+                  name={passwordVisible ? "eye-off" : "eye"}
+                  size={24}
+                  color="grey"
+                />
+              </TouchableOpacity>
+            </View>
+            <RoundButton
+              onPress={signIn}
+              title="Log in"
+              buttonWidth={buttonWidth}
+              backgroundColor={colors.secondary}
+            />
+            <RoundButton
+              onPress={() => navigation.navigate("SignUp")}
+              title="Don't Have an account? Sign Up"
+              buttonWidth={buttonWidth}
+              backgroundColor={colors.accent}
+            />
+          </View>
         </View>
-        <View style={styles.buttonContainer}>
-          <TextInput
-            placeholder="Email"
-            value={credentials.email}
-            onChangeText={(text) =>
-              setCredentials({ ...credentials, email: text })
-            }
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Password"
-            onChangeText={(text) =>
-              setCredentials({ ...credentials, password: text })
-            }
-            secureTextEntry={true}
-            style={styles.input}
-          />
-          <RoundButton
-            onPress={signIn}
-            title="Log in"
-            buttonWidth={buttonWidth}
-            backgroundColor={colors.secondary}
-          />
-          <RoundButton
-            onPress={() => navigation.navigate("SignUp")}
-            title="Don't Have an account? Sign Up" // Fixed typo in title
-            buttonWidth={buttonWidth}
-            backgroundColor={colors.accent}
-          />
-        </View>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </View>
   );
 }
 

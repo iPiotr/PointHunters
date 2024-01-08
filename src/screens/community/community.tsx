@@ -9,13 +9,25 @@ import styles from "./community.styles";
 const Community: React.FC = () => {
   const [posts, setPosts] = useState<Posts>({});
 
-  useEffect(() => {
-    const unsubscribe = fetchPosts((data: Posts) => {
-      setPosts(data);
-    });
+  const loadPosts = async () => {
+    try {
+      const data = await fetchPosts();
+      if (data) {
+        setPosts(data);
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      // Optionally handle the error in the UI
+    }
+  };
 
-    return () => unsubscribe();
+  useEffect(() => {
+    loadPosts();
   }, []);
+
+  const handleRefresh = () => {
+    loadPosts(); // Call the same function used in useEffect
+  };
 
   const renderPosts = () =>
     Object.entries(posts).map(([postId, postInfo]) => (
@@ -27,7 +39,12 @@ const Community: React.FC = () => {
       <View style={GlobalStyles.topBar}>
         <Ionicons name="arrow-back" size={28} color="black" />
         <Text style={{ fontSize: 22 }}>Community</Text>
-        <Ionicons name="settings-outline" size={28} color="black" />
+        <Ionicons
+          name="refresh"
+          size={28}
+          color="black"
+          onPress={handleRefresh}
+        />
       </View>
       <ScrollView style={styles.postBoard}>
         {renderPosts()}
