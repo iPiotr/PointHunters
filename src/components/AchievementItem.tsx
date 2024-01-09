@@ -32,7 +32,7 @@ const AchievementItem: React.FC<AchievementItemProps> = ({
         {achievement.title}
       </Text>
       <Text>{achievement.description}</Text>
-      <Text>Progress</Text>
+      {/* <Text>Progress</Text> */}
       {/* <ProgressBar
         progress={parseFloat(achievement.progress)}
         width={progressBarWidth}

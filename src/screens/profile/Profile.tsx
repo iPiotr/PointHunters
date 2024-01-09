@@ -8,6 +8,7 @@ import {
   TextInput,
   Button,
   Linking,
+  ImageBackground,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "./profile.styles";
@@ -97,6 +98,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
   setEditedEmail,
   editedPassword,
   setEditedPassword,
+  userData,
 }) => {
   const { user } = useAuth();
 
@@ -161,13 +163,19 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
           </View>
         );
       case "Account card":
+        console.log(userData);
+
         return (
           <View>
-            <Image
-              source={user ? { uri: user.photoURL } : "Loading..."}
-              style={GlobalStyles.profilePhoto}
-            />
-            <Text>Total Hunts:</Text>
+            <Text>{user ? user.displayName : "Loading..."}</Text>
+            <Text>Personal stats</Text>
+            <Text>
+              Completed Hunts: {userData ? userData.huntTimes : "Loading..."}
+            </Text>
+            <Text>
+              Hunted Points:{" "}
+              {userData ? userData.pointsCollected : "Loading..."}
+            </Text>
           </View>
         );
       case "Help Center":
@@ -195,28 +203,69 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
     }
   };
 
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={isVisible}
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity
-        style={styles.fullScreenModalContainer}
-        activeOpacity={1}
-        onPress={() => setFullScreenVisible(false)}
+  console.log(content);
+
+  if (content == "Account card") {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isVisible}
+        onRequestClose={onClose}
+      >
+        <ImageBackground
+          source={
+            user ? { uri: user.photoURL } : require("@assets/background.png")
+          }
+          style={styles.background}
+        >
+          <TouchableOpacity
+            style={styles.fullScreenModalContainerCard}
+            activeOpacity={1}
+            // onPress={() => setFullScreenVisible(false)}
+          >
+            <Ionicons
+              name="arrow-back-circle-sharp"
+              size={56}
+              color={colors.lightgrey}
+              style={styles.iconStyle}
+              onPress={onClose}
+            />
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+              style={styles.modalContentCard}
+            >
+              {renderContent(content)}
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </ImageBackground>
+      </Modal>
+    );
+  } else {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isVisible}
+        onRequestClose={onClose}
       >
         <TouchableOpacity
+          style={styles.fullScreenModalContainer}
           activeOpacity={1}
-          onPress={(e) => e.stopPropagation()}
-          style={styles.modalContent}
+          onPress={() => setFullScreenVisible(false)}
         >
-          {renderContent(content)}
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            style={styles.modalContent}
+          >
+            {renderContent(content)}
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
-    </Modal>
-  );
+      </Modal>
+    );
+  }
 };
 
 const OptionButton: React.FC<OptionButtonProps> = ({
@@ -302,21 +351,21 @@ const Profile: React.FC = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (userData && userData.uid) {
-      fetchUserById(USER_ID, (userData: UserType | null) => {
+    console.log("Checking user state:", user);
+    if (user && user.uid) {
+      console.log("Fetching user data for UID:", user.uid);
+      fetchUserById(user.uid, (userData: UserType | null) => {
         if (userData) {
+          console.log("User data fetched:", userData);
           setUser(userData);
-          setEditedName(userData.name);
-          setEditedLastName(userData.lastName);
+        } else {
+          console.log("No user data found for UID:", user.uid);
         }
       });
     }
-  }, []);
+  }, [user]); // Consider adding `user` as a dependency if it can change
 
   const handleSave = async (value, type) => {
-    console.log(type);
-    console.log(value);
-
     try {
       if (type === "name") {
         await updateProfile(user, {
@@ -338,8 +387,6 @@ const Profile: React.FC = () => {
     } catch (error) {
       console.error("Error update user:", error);
     }
-
-    console.log(user);
 
     updateNameById(user.uid, editedName);
   };
@@ -365,6 +412,7 @@ const Profile: React.FC = () => {
         setEditedPassword={setEditedPassword}
         handleSave={handleSave}
         isEditing={isEditing}
+        userData={userData}
       />
 
       <View style={[GlobalStyles.topBar, styles.topBarSpec]}>

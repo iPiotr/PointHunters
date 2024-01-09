@@ -5,6 +5,7 @@ import {
   set,
   get,
   runTransaction,
+  push,
 } from "firebase/database";
 
 interface UserParams {
@@ -60,13 +61,62 @@ export const addUserToDatabase = async ({
   });
 };
 
+export const addToAchievementTable = async ({ uid }) => {
+  const newUserRef = ref(db, `user-achievements/${uid}`);
+  await set(newUserRef, {});
+};
+
+export const initializeUserRewards = async (uid, initialRewards = {}) => {
+  const userRewardsRef = ref(db, `rewards/${uid}`);
+
+  await set(userRewardsRef, {
+    // You can set default values or just an empty object
+    ...initialRewards,
+  });
+};
+
 // Achievements-related functions
 export const fetchAchievements = (callback: Function) => {
-  const achievementsRef = ref(db, "achievements");
+  const achievementsRef = ref(db, `gameAchievements`);
+  return onValue(achievementsRef, (snapshot) => {
+    const data = snapshot.val();
+    // Convert the data to an array if it's not undefined and is an object
+    const achievementsArray =
+      data && typeof data === "object" ? Object.values(data) : [];
+    callback(achievementsArray);
+  });
+};
+
+export const fetchUserAchievements = (uid, callback: Function) => {
+  const achievementsRef = ref(db, `user-achievements/${uid}`);
   return onValue(achievementsRef, (snapshot) => {
     const data = snapshot.val();
     callback(data);
   });
+};
+
+export const updateUserAchievements = async (uid, userData, achievements) => {
+  const userAchievementsRef = ref(db, `user-achievements/${uid}`);
+
+  // Fetch current user achievements
+  let userAchievements;
+  const snapshot = await get(userAchievementsRef);
+  if (snapshot.exists()) {
+    userAchievements = snapshot.val();
+  } else {
+    // If no achievements exist, initialize them
+    userAchievements = achievements.map(() => false);
+  }
+
+  // Update the achievements based on huntTimes
+  achievements.forEach((achievement, index) => {
+    if ((userData.huntTimes = achievement.amount)) {
+      userAchievements[index] = true;
+    }
+  });
+
+  // Update the user achievements in the database
+  await set(userAchievementsRef, userAchievements);
 };
 
 // Rewards-related functions
@@ -76,6 +126,42 @@ export const fetchRewards = (callback: Function) => {
     const data = snapshot.val();
     callback(data);
   });
+};
+
+export const fetchNotifications = (uid, callback: Function) => {
+  const achievementsRef = ref(db, `notifications/${uid}`);
+  return onValue(achievementsRef, (snapshot) => {
+    const data = snapshot.val();
+    callback(data);
+  });
+};
+
+const formatDate = (date) => {
+  const d = new Date(date);
+  const day = ("0" + d.getDate()).slice(-2);
+  const month = ("0" + (d.getMonth() + 1)).slice(-2);
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+// Function to add a notification with the current date
+export const addNotification = (uid, content, type) => {
+  const db = getDatabase();
+  const notificationsRef = ref(db, `notifications/${uid}`);
+
+  const newNotification = {
+    content,
+    date: formatDate(new Date()), // Add the current date
+    type,
+  };
+
+  push(notificationsRef, newNotification)
+    .then(() => {
+      console.log("Notification added successfully");
+    })
+    .catch((error) => {
+      console.error("Error adding notification:", error);
+    });
 };
 
 // Posts-related functions
@@ -100,8 +186,9 @@ export const updatePostById = (postId: string, updatedData: any) => {
   set(postRef, updatedData);
 };
 
-export const incrementWin = (userId: number) => {
+export const incrementWin = (userId: number, score: number) => {
   const userRef = ref(db, `users/${userId}/huntTimes`);
+  const userRef2 = ref(db, `users/${userId}/pointsCollected`);
 
   runTransaction(userRef, (currentWins) => {
     // If currentWins has never been set, initialize it to 0.
@@ -109,6 +196,15 @@ export const incrementWin = (userId: number) => {
       return 1;
     } else {
       return currentWins + 1;
+    }
+  });
+
+  runTransaction(userRef2, (currnetPoints) => {
+    // If currentWins has never been set, initialize it to 0.
+    if (currnetPoints === null) {
+      return score;
+    } else {
+      return currnetPoints + score;
     }
   });
 };

@@ -15,6 +15,10 @@ import {
   incrementWin,
   addNewPost,
   fetchUserById,
+  fetchAchievements,
+  fetchUserAchievements,
+  updateUserAchievements,
+  addNotification,
 } from "../../services/firebaseService";
 
 import MapView, { Marker, Polyline } from "react-native-maps";
@@ -38,7 +42,7 @@ export default function App() {
   const [distance, setDistance] = useState(0);
   const [score, setScore] = useState(0);
   const [showPostCreation, setShowPostCreation] = useState(false);
-  const [userData, setUserData] = useState(null);
+  // const [userData, setUserData] = useState(null);
   const [distanceBetweenPoints, setDistanceBetweenPoints] = useState(200);
   const [pointsAmount, setPointsAmounts] = useState(2);
 
@@ -105,6 +109,7 @@ export default function App() {
         );
 
         retryCount++;
+        console.log(retryCount);
       }
       console.log(newDestination);
 
@@ -274,13 +279,61 @@ export default function App() {
       </View>
     </Modal>
   );
+  const [achievements, setAchievements] = useState({});
+  const [userAchievements, setUserAchievements] = useState([]);
+  const [userData, setUser] = useState<UserType | null>(null);
+
+  // useEffect(() => {
+  //   if (score === pointsAmount) {
+  //     setGameOver(true);
+  //     incrementWin(user.uid, score);
+
+  //     const unsubscribeAchievements = fetchAchievements(setAchievements);
+  //     const unsubscribeUserAchievements = fetchUserAchievements(
+  //       user.uid,
+  //       setUserAchievements
+  //     );
+  //     console.log(achievements);
+  //     console.log(userAchievements);
+  //   }
+  // }, [score]);
 
   useEffect(() => {
-    if (score === pointsAmount) {
-      setGameOver(true);
-      incrementWin(user.uid);
+    if (user && user.uid) {
+      if (score === pointsAmount) {
+        setGameOver(true);
+        incrementWin(user.uid, score);
+
+        const unsubscribeAchievements = fetchAchievements((data) => {
+          console.log("Fetched achievements:", data);
+          setAchievements(data);
+        });
+        const unsubscribeUserAchievements = fetchUserAchievements(
+          user.uid,
+          setUserAchievements
+        );
+        fetchUserById(user.uid, (userData: UserType | null) => {
+          if (userData) {
+            console.log("User data fetched:", userData);
+            setUser(userData);
+          } else {
+            console.log("No user data found for UID:", user.uid);
+          }
+        });
+        updateUserAchievements(user.uid, userData, achievements);
+
+        console.log(achievements);
+        console.log(userAchievements);
+        console.log("User data fetched:", userData);
+
+        return () => {
+          unsubscribeAchievements();
+          unsubscribeUserAchievements();
+          userData;
+        };
+      }
     }
-  }, [score]);
+  }, [user, score]);
 
   const handleCreatePost = () => {
     setShowPostCreation(true);
@@ -296,6 +349,7 @@ export default function App() {
       };
 
       addNewPost(newPost);
+      addNotification(user.uid, "You publish post", "post");
       // Logic to handle post publishing
       setShowPostCreation(false);
       restartGame();

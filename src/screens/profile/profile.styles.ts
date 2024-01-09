@@ -66,6 +66,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  fullScreenModalContainerCard: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+  modalContentCard: {
+    width: "80%",
+    height: "50%",
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   changeInput: {
     borderWidth: 1,
     borderRadius: 10,
@@ -73,6 +88,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     width: "60%",
     fontSize: 18,
+  },
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconStyle: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 1,
   },
 });
 

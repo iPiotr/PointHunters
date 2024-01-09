@@ -17,6 +17,7 @@ import {
 import {
   fetchAchievements,
   fetchRewards,
+  fetchUserAchievements,
   fetchUserById,
 } from "../../services/firebaseService";
 import useAuth from "../../FirebaseAuth/useAuth";
@@ -39,6 +40,8 @@ const Statistics: React.FC = () => {
   const [userData, setUser] = useState<UserType | null>(null);
   const { user } = useAuth();
 
+  const [userAchievements, setUserAchievements] = useState([]);
+
   // const firstFourAchievements = Object.values(achievements).slice(0, 4);
   // const remainingAchievements = Object.values(achievements).slice(4);
 
@@ -46,20 +49,26 @@ const Statistics: React.FC = () => {
     if (user && user.uid) {
       // Check if user is not null and has a uid
       const unsubscribeAchievements = fetchAchievements(setAchievements);
+      const unsubscribeUserAchievements = fetchUserAchievements(
+        user.uid,
+        setUserAchievements
+      );
       const unsubscribeRewards = fetchRewards(setRewards);
       const userData = fetchUserById(user.uid, (userData: UserType | null) => {
-        if (userData) {
-          setUser(userData);
-        }
+        setUser(userData);
       });
 
       return () => {
         unsubscribeAchievements();
+        unsubscribeUserAchievements();
         unsubscribeRewards();
         userData; // This looks like a leftover line. Ensure you correctly handle unsubscription or cleanup.
       };
     }
   }, [user]);
+
+  console.log(achievements);
+  console.log(userAchievements);
 
   return (
     <View style={GlobalStyles.container}>
@@ -81,14 +90,14 @@ const Statistics: React.FC = () => {
             style={GlobalStyles.profilePhoto}
           />
         ) : (
-          <Text>Loading...</Text> // Display a text or a placeholder image when loading
+          <Text>Loading...</Text>
         )}
         <Text style={{ fontSize: 22, fontWeight: "bold" }}>
           Hello, {user ? `${user.displayName}` : "Loading..."}
         </Text>
       </View>
 
-      <Text style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}>
+      {/* <Text style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}>
         Rewards
       </Text>
 
@@ -108,14 +117,15 @@ const Statistics: React.FC = () => {
             </Text>
           </TouchableOpacity>
         )}
-      </View>
+      </View> */}
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}>
           Achievements
         </Text>
         {Object.values(achievements)
-          .slice(0, 2)
+          .filter((_, index) => userAchievements[index]) // Filter based on userAchievements
+          .slice(0, 2) // Adjust this slice as per your display requirement
           .map((achievement, index) => (
             <AchievementItem
               key={index}

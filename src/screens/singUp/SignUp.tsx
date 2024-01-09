@@ -16,6 +16,7 @@ import {
   fetchUserById,
   updateUserById,
   addUserToDatabase,
+  initializeUserRewards,
 } from "../../services/firebaseService";
 import { StackScreenProps } from "@react-navigation/stack";
 
@@ -58,6 +59,55 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
     const pointsCollected = 0;
     const { email, password, displayName } = credentials;
 
+    let missingFields = []; // Array to store the names of missing fields
+
+    if (!displayName) missingFields.push("Name");
+    if (!email) missingFields.push("Email");
+    if (!password) missingFields.push("Password");
+
+    if (missingFields.length > 0) {
+      // If there are missing fields, show an alert
+      Alert.alert(
+        "Missing Fields",
+        `Please fill in the following fields: ${missingFields.join(", ")}`,
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    if (!email || !password || !displayName) {
+      setCredentials({
+        ...credentials,
+        error: "All fields are mandatory.",
+      });
+      return;
+    }
+
+    // try {
+    //   await createUserWithEmailAndPassword(auth, email, password);
+    //   await addUserToDatabase({
+    //     email,
+    //     displayName,
+    //     uid,
+    //     huntTimes: 0,
+    //     pointsCollected: 0,
+    //   }); // Add the user to the database
+    //   navigation.navigate("SignIn");
+    // } catch (error) {
+    //   if (error instanceof Error) {
+    //     setCredentials({
+    //       ...credentials,
+    //       error: error.message,
+    //     });
+    //   } else {
+    //     // Handle other types of errors or set a generic error message
+    //     setCredentials({
+    //       ...credentials,
+    //       error: "An unexpected error occurred.",
+    //     });
+    //   }
+    // }
+
     try {
       const auth = getAuth();
 
@@ -97,55 +147,6 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
     } catch (error) {
       console.error("Error registering new user:", error);
     }
-
-    let missingFields = []; // Array to store the names of missing fields
-
-    if (!displayName) missingFields.push("Name");
-    if (!email) missingFields.push("Email");
-    if (!password) missingFields.push("Password");
-
-    if (missingFields.length > 0) {
-      // If there are missing fields, show an alert
-      Alert.alert(
-        "Missing Fields",
-        `Please fill in the following fields: ${missingFields.join(", ")}`,
-        [{ text: "OK" }]
-      );
-      return;
-    }
-
-    if (!email || !password || !displayName) {
-      setCredentials({
-        ...credentials,
-        error: "All fields are mandatory.",
-      });
-      return;
-    }
-
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      addUserToDatabase({
-        email,
-        displayName,
-        uid,
-        huntTimes: 0,
-        pointsCollected: 0,
-      }); // Add the user to the database
-      navigation.navigate("SignIn");
-    } catch (error) {
-      if (error instanceof Error) {
-        setCredentials({
-          ...credentials,
-          error: error.message,
-        });
-      } else {
-        // Handle other types of errors or set a generic error message
-        setCredentials({
-          ...credentials,
-          error: "An unexpected error occurred.",
-        });
-      }
-    }
   };
 
   return (
@@ -168,7 +169,10 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
                 placeholder={field.placeholder}
                 value={credentials[field.key]}
                 onChangeText={(text) =>
-                  setCredentials((prev) => ({ ...prev, [field.key]: text }))
+                  setCredentials((prev) => ({
+                    ...prev,
+                    [field.key]: text.trimEnd(),
+                  }))
                 }
                 secureTextEntry={field.isSecure}
                 style={[styles.input, GlobalStyles.topBarShadow]}

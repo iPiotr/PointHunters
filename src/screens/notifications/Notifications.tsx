@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "./notifications.styles";
@@ -11,6 +11,8 @@ import {
   Achievements,
   Rewards,
 } from "@components";
+import useAuth from "../../FirebaseAuth/useAuth";
+import { fetchNotifications } from "../../services/firebaseService";
 
 const randomImageUrl = "https://picsum.photos/000";
 
@@ -32,6 +34,25 @@ const like3 = {
 const likeArray = [like1, like2, like3];
 
 const Notifications: React.FC = () => {
+  const [userNotifications, setUserNotyfications] = useState([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && user.uid) {
+      // Check if user is not null and has a uid
+      const unsubscribeNotifications = fetchNotifications(
+        user.uid,
+        setUserNotyfications
+      );
+
+      return () => {
+        unsubscribeNotifications();
+      };
+    }
+  }, [user]);
+  const userNotificationsArray = Object.values(userNotifications);
+  // console.log(userNotifications);
+
   return (
     <View style={GlobalStyles.container}>
       <View
@@ -49,12 +70,13 @@ const Notifications: React.FC = () => {
         <Text style={{ fontWeight: "bold", fontSize: 16, marginLeft: 10 }}>
           Today
         </Text>
-        {likeArray.map((like, index) => (
+        {userNotificationsArray.map((notification, index) => (
           <BlockWithShadow
             key={index}
             width="90%"
             borderRadius={10}
             paddingLeft={10}
+            padding={20}
           >
             <View
               style={{
@@ -63,11 +85,14 @@ const Notifications: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              <Ionicons name="md-heart-sharp" size={24} color="red" />
+              <Ionicons name="medal-outline" size={24} color="black" />
               <Text>
-                <Text style={{ fontWeight: "bold" }}> You got achievement</Text>{" "}
+                <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                  {" "}
+                  {notification.content} {notification.date}
+                </Text>
               </Text>
-              <Image source={{ uri: like.photo }} style={styles.postPhoto} />
+              {/* <Image source={{ uri: like.photo }} style={styles.postPhoto} /> */}
             </View>
           </BlockWithShadow>
         ))}

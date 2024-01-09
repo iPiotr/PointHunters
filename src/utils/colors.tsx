@@ -9,6 +9,7 @@ const colors = {
   text: "#212121",
   border: "#430f58",
   grey: "#333",
+  lightgrey: "#d3d3d3",
   black: "#000",
 };
 
