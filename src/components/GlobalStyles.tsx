@@ -5,7 +5,6 @@ const GlobalStyles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    // fontFamily: "Roboto",
     backgroundColor: colors.white,
   },
   topBar: {

@@ -1,9 +1,7 @@
+// @ts-nocheck
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import colors from "../utils/colors";
-import Ionicons from "@expo/vector-icons/Ionicons";
-
-let randomImageUrl = "https://picsum.photos/000";
 
 type Props = {
   width: number | string;
@@ -25,10 +23,10 @@ const BlockWithShadow: React.FC<Props> = ({
   children,
 }) => {
   return (
-    <View style={styless.container}>
+    <View style={styles.container}>
       <View
         style={[
-          styless.notification,
+          styles.content,
           {
             width,
             borderRadius,
@@ -45,14 +43,14 @@ const BlockWithShadow: React.FC<Props> = ({
   );
 };
 
-const styless = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
     marginTop: 10,
     width: "100%",
   },
-  notification: {
+  content: {
     justifyContent: "space-around",
     backgroundColor: colors.postBlock,
     marginBottom: 6,
@@ -62,13 +60,6 @@ const styless = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
     width: "90%",
-  },
-  postPhoto: {
-    width: 50,
-    height: 50,
-    margin: 8,
-    borderRadius: 10,
-    marginLeft: "auto",
   },
   endElement: {
     marginLeft: "auto",
