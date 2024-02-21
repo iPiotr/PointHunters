@@ -9,7 +9,13 @@ const styles = StyleSheet.create({
     marginLeft: "auto",
   },
   notificationBlock: {
+    flexDirection: "row",
     paddingLeft: 10,
+    alignItems: "center",
+    gap: 10,
+  },
+  date: {
+    fontSize: 8,
   },
 });
 

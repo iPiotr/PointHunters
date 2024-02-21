@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from "react";
 import {
   Image,
@@ -6,14 +7,13 @@ import {
   ImageBackground,
   Dimensions,
   TouchableOpacity,
-  Text,
 } from "react-native";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { StackScreenProps } from "@react-navigation/stack";
 
 import styles from "./singIn.styles";
 import colors from "../../utils/colors";
-import { BlockWithShadow, GlobalStyles, RoundButton } from "@components";
+import { GlobalStyles, RoundButton } from "@components";
 import { Ionicons } from "@expo/vector-icons";
 
 const screenWidth = Dimensions.get("window").width;

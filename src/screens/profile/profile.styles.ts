@@ -102,6 +102,10 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
   },
+  nameText: {
+    fontSize: 28,
+    fontWeight: "bold",
+  },
 });
 
 export default styles;

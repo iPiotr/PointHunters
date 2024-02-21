@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -49,7 +50,9 @@ export default function App() {
   const [isStarted, setIsStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
-  const USER_ID = 1;
+  const [timerStart, setTimerStart] = useState(null);
+  const [currentTime, setCurrentTime] = useState(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   const { user } = useAuth();
 
@@ -60,8 +63,23 @@ export default function App() {
     setPointsAmounts(pointsAmount);
 
     setIsStarted(true);
-    // Any additional logic to start the game, e.g., setting up location tracking
+    setTimerStart(new Date()); // Set the timer start time
+    setIsTimerRunning(true); // Start the timer
   };
+
+  useEffect(() => {
+    let interval = null;
+
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 1000);
+    } else if (!isTimerRunning && timerStart !== null) {
+      clearInterval(interval);
+    }
+
+    return () => clearInterval(interval);
+  }, [isTimerRunning, timerStart]);
 
   //TODO FIRST-DESTINATION
 
@@ -85,7 +103,7 @@ export default function App() {
         return calculateNewLocation(
           latitude,
           longitude,
-          3, // Adjust the distance as needed
+          3,
           Math.random() * 2 * Math.PI
         );
       };
@@ -261,24 +279,30 @@ export default function App() {
     </Modal>
   );
 
-  const renderPostCreationModal = () => (
-    <Modal
-      visible={showPostCreation}
-      transparent={true}
-      onRequestClose={() => setShowPostCreation(false)}
-    >
-      <View style={GlobalStyles.centeredView}>
-        <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
-          <Text>I scored {score} points!</Text>
-          <Image
-            source={{ uri: "https://picsum.photos/000" }}
-            style={styles.mapImage}
-          />
-          <Button title="Publish" onPress={handlePublish} />
+  const renderPostCreationModal = () => {
+    const elapsedTime = timerStart
+      ? Math.floor((currentTime - timerStart) / 1000)
+      : 0;
+    return (
+      <Modal
+        visible={showPostCreation}
+        transparent={true}
+        onRequestClose={() => setShowPostCreation(false)}
+      >
+        <View style={GlobalStyles.centeredView}>
+          <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
+            <Text>I scored {score} points!</Text>
+            <Image
+              source={{ uri: "https://picsum.photos/000" }}
+              style={styles.mapImage}
+            />
+            <Text>Time Elapsed: {elapsedTime} seconds</Text>
+            <Button title="Publish" onPress={handlePublish} />
+          </View>
         </View>
-      </View>
-    </Modal>
-  );
+      </Modal>
+    );
+  };
   const [achievements, setAchievements] = useState({});
   const [userAchievements, setUserAchievements] = useState([]);
   const [userData, setUser] = useState<UserType | null>(null);
@@ -303,6 +327,8 @@ export default function App() {
       if (score === pointsAmount) {
         setGameOver(true);
         incrementWin(user.uid, score);
+
+        setIsTimerRunning(false);
 
         const unsubscribeAchievements = fetchAchievements((data) => {
           console.log("Fetched achievements:", data);

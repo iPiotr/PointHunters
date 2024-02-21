@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import polyline from "@mapbox/polyline";
-import { incrementWin } from "../../services/firebaseService";
+import { incrementWin } from "../firebaseService";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 

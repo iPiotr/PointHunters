@@ -61,7 +61,7 @@ export const addUserToDatabase = async ({
   });
 };
 
-export const addToAchievementTable = async ({ uid }) => {
+export const addToAchievementsObject = async ({ uid }) => {
   const newUserRef = ref(db, `user-achievements/${uid}`);
   await set(newUserRef, {});
 };

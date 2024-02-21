@@ -1,37 +1,12 @@
+// @ts-nocheck
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "./notifications.styles";
 
-import {
-  GlobalStyles,
-  BlockWithShadow,
-  RewardItem,
-  AchievementItem,
-  Achievements,
-  Rewards,
-} from "@components";
+import { GlobalStyles, BlockWithShadow } from "@components";
 import useAuth from "../../FirebaseAuth/useAuth";
 import { fetchNotifications } from "../../services/firebaseService";
-
-const randomImageUrl = "https://picsum.photos/000";
-
-const like1 = {
-  who: "piotr.s",
-  text: "liked your post",
-  photo: randomImageUrl,
-};
-const like2 = {
-  who: "piotr.s",
-  text: "liked your post",
-  photo: randomImageUrl,
-};
-const like3 = {
-  who: "piotr.s",
-  text: "liked your post",
-  photo: randomImageUrl,
-};
-const likeArray = [like1, like2, like3];
 
 const Notifications: React.FC = () => {
   const [userNotifications, setUserNotyfications] = useState([]);
@@ -78,31 +53,17 @@ const Notifications: React.FC = () => {
             paddingLeft={10}
             padding={20}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                paddingLeft: 10,
-                alignItems: "center",
-              }}
-            >
+            <View style={styles.notificationBlock}>
               <Ionicons name="medal-outline" size={24} color="black" />
-              <Text>
+              <View>
                 <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-                  {" "}
-                  {notification.content} {notification.date}
+                  {notification.content}
                 </Text>
-              </Text>
-              {/* <Image source={{ uri: like.photo }} style={styles.postPhoto} /> */}
+                <Text>{notification.date}</Text>
+              </View>
             </View>
           </BlockWithShadow>
         ))}
-        <View
-          style={{
-            height: 70,
-            width: "100%",
-            opacity: 0,
-          }}
-        ></View>
       </ScrollView>
     </View>
   );

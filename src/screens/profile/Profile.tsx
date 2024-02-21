@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -166,16 +167,34 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
         console.log(userData);
 
         return (
-          <View>
-            <Text>{user ? user.displayName : "Loading..."}</Text>
+          <View style={{ alignItems: "center" }}>
+            <Text style={styles.nameText}>
+              {user ? user.displayName : "Loading..."}
+            </Text>
             <Text>Personal stats</Text>
-            <Text>
-              Completed Hunts: {userData ? userData.huntTimes : "Loading..."}
-            </Text>
-            <Text>
-              Hunted Points:{" "}
-              {userData ? userData.pointsCollected : "Loading..."}
-            </Text>
+
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+                marginTop: 40,
+              }}
+            >
+              <View style={{ alignItems: "center", paddingRight: 30 }}>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {userData ? userData.huntTimes : "Loading..."}
+                </Text>
+                <Text>Completed</Text>
+                <Text>Hunts</Text>
+              </View>
+              <View style={{ alignItems: "center" }}>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {userData ? userData.pointsCollected : "Loading..."}
+                </Text>
+                <Text>Hunted</Text>
+                <Text>Points</Text>
+              </View>
+            </View>
           </View>
         );
       case "Help Center":

@@ -7,7 +7,12 @@
  * @param lon2 - The parameter `lon2` represents the longitude of the second location.
  * @returns The function `calculateDistance` returns the distance between two points in meters.
  */
-export const calculateDistance = (lat1, lon1, lat2, lon2) => {
+export const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
   const R = 6371; // Radius of the Earth in km
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
@@ -33,7 +38,12 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
  * @returns The function `calculateNewLocation` returns an object with the properties `latitude` and
  * `longitude`.
  */
-export const calculateNewLocation = (lat, lon, distance, bearing) => {
+export const calculateNewLocation = (
+  lat: number,
+  lon: number,
+  distance: number,
+  bearing: number
+) => {
   const EarthRadius = 6371; // Earth's radius in kilometers
   const dR = distance / 1000 / EarthRadius; // Convert distance to radians
   const latitude1 = (lat * Math.PI) / 180; // Convert latitude to radians
