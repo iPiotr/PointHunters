@@ -19,8 +19,6 @@ const AchievementItem: React.FC<AchievementItemProps> = ({
   achievement,
   contentWidth,
 }) => {
-  // const progressBarWidth = contentWidth ? contentWidth - 40 : screenWidth * 0.8;
-
   return (
     <BlockWithShadow
       width="90%"
