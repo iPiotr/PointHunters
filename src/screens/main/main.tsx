@@ -10,6 +10,8 @@ import {
   Image,
   ImageBackground,
   TextInput,
+  Clipboard,
+  TouchableOpacity,
 } from "react-native";
 
 import {
@@ -44,8 +46,8 @@ export default function App() {
   const [score, setScore] = useState(0);
   const [showPostCreation, setShowPostCreation] = useState(false);
   // const [userData, setUserData] = useState(null);
-  const [distanceBetweenPoints, setDistanceBetweenPoints] = useState(200);
-  const [pointsAmount, setPointsAmounts] = useState(2);
+  const [distanceBetweenPoints, setDistanceBetweenPoints] = useState(100);
+  const [pointsAmount, setPointsAmounts] = useState(1);
 
   const [isStarted, setIsStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
@@ -53,12 +55,14 @@ export default function App() {
   const [timerStart, setTimerStart] = useState(null);
   const [currentTime, setCurrentTime] = useState(null);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [showCreateButton, setShowCreateButton] = useState(false);
 
   const { user } = useAuth();
 
   const startGame = async () => {
     console.log(distanceBetweenPoints);
     console.log(pointsAmount);
+    console.log(gameOver);
     setDistanceBetweenPoints(distanceBetweenPoints);
     setPointsAmounts(pointsAmount);
 
@@ -103,7 +107,7 @@ export default function App() {
         return calculateNewLocation(
           latitude,
           longitude,
-          3,
+          distanceBetweenPoints,
           Math.random() * 2 * Math.PI
         );
       };
@@ -154,13 +158,13 @@ export default function App() {
       subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 7000,
-          distanceInterval: 10,
+          timeInterval: 1000,
+          distanceInterval: 1,
         },
         (newLocation) => {
           setCurrentLocation(newLocation);
           if (endCoordinate) {
-            updateRoute(newLocation, endCoordinate);
+            // updateRoute(newLocation, endCoordinate);
           }
         }
       );
@@ -179,7 +183,7 @@ export default function App() {
       );
       setDistance(distance);
 
-      if (distance <= 5) {
+      if (distance <= 1) {
         try {
           const newEndCoords = calculateNewLocation(
             currentLocation.coords.latitude,
@@ -208,38 +212,38 @@ export default function App() {
 
   //TODO CHECK-DESTINATION/NEW-DESTINATION
 
-  const updateRoute = async (currentLoc, destination) => {
-    const points = await getDirections(
-      `${currentLoc.coords.latitude},${currentLoc.coords.longitude}`,
-      `${destination.latitude},${destination.longitude}`
-    );
-    setRouteCoordinates(points);
-  };
+  // const updateRoute = async (currentLoc, destination) => {
+  //   const points = await getDirections(
+  //     `${currentLoc.coords.latitude},${currentLoc.coords.longitude}`,
+  //     `${destination.latitude},${destination.longitude}`
+  //   );
+  //   setRouteCoordinates(points);
+  // };
 
-  const getDirections = async (startLoc, destinationLoc) => {
-    try {
-      const apiKey = "AIzaSyDSj3cHx7G4r19ug35-KfYNaYTiZpgNH5M"; // Replace with your actual API key
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${startLoc}&destination=${destinationLoc}&key=${apiKey}`
-      );
-      const jsonResponse = await response.json();
+  // const getDirections = async (startLoc, destinationLoc) => {
+  //   try {
+  //     const apiKey = "AIzaSyDSj3cHx7G4r19ug35-KfYNaYTiZpgNH5M"; // Replace with your actual API key
+  //     const response = await fetch(
+  //       `https://maps.googleapis.com/maps/api/directions/json?origin=${startLoc}&destination=${destinationLoc}&key=${apiKey}`
+  //     );
+  //     const jsonResponse = await response.json();
 
-      if (jsonResponse.status !== "OK" || !jsonResponse.routes.length) {
-        console.error("No routes found or API error:", jsonResponse.status);
-        return []; // Return an empty array in case of error or no routes
-      }
-      const route = polyline.decode(
-        jsonResponse.routes[0].overview_polyline.points
-      );
-      return route.map((point) => ({
-        latitude: point[0],
-        longitude: point[1],
-      }));
-    } catch (error) {
-      console.error("Error fetching directions:", error);
-      return []; // Return an empty array in case of error
-    }
-  };
+  //     if (jsonResponse.status !== "OK" || !jsonResponse.routes.length) {
+  //       console.error("No routes found or API error:", jsonResponse.status);
+  //       return []; // Return an empty array in case of error or no routes
+  //     }
+  //     const route = polyline.decode(
+  //       jsonResponse.routes[0].overview_polyline.points
+  //     );
+  //     return route.map((point) => ({
+  //       latitude: point[0],
+  //       longitude: point[1],
+  //     }));
+  //   } catch (error) {
+  //     console.error("Error fetching directions:", error);
+  //     return []; // Return an empty array in case of error
+  //   }
+  // };
 
   let text = "Waiting..";
   let initialRegion = null;
@@ -255,6 +259,12 @@ export default function App() {
     };
   }
 
+  const showCreateButtonDelayed = () => {
+    setTimeout(() => {
+      setShowCreateButton(true);
+    }, 2000);
+  };
+
   const renderGameOverModal = () => (
     <Modal
       visible={gameOver && !showPostCreation}
@@ -264,9 +274,16 @@ export default function App() {
       <View style={GlobalStyles.centeredView}>
         <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
           <Text style={styles.modalText}>You Win!</Text>
+          <Text style={styles.modalText}>
+            Points Scored: {score > pointsAmount ? pointsAmount : score}
+          </Text>
+          <Text style={styles.modalText}>
+            Between points: {parseInt(distanceBetweenPoints)}m
+          </Text>
           <Text style={styles.createButton} onPress={handleCreatePost}>
             Create Post
           </Text>
+
           <MaterialCommunityIcons
             name="close-circle-outline"
             size={36}
@@ -279,10 +296,79 @@ export default function App() {
     </Modal>
   );
 
+  function convertToHTML(pointsAmount, distanceBetweenPoints) {
+    const pointsLabel = pointsAmount === 1 ? "point" : "points";
+    const htmlContent = `
+        <div
+      style="
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        background: white;
+        width: 300px;
+        height: 210px;
+        background-image: url('https://i.imgur.com/Tfb3KaG.png');
+        background-repeat: no-repeat;
+        background-size: 350px;
+        font-family: 'arial';
+      "
+    >
+      <div
+        style="
+          position: absolute;
+          top: 120px;
+          left: 150px;
+          font-size: 22px;
+          z-index: 1;
+          color: black;
+        "
+      >
+        ${pointsAmount} ${pointsLabel}
+      </div>
+      <div
+        style="
+          position: absolute;
+          top: 170px;
+          left: 150px;
+          font-size: 22px;
+          z-index: 2;
+          color: black;
+        "
+      >
+        ${distanceBetweenPoints} m
+      </div>
+    </div>
+    `;
+    return htmlContent;
+  }
+
+  const handleCopyToClipboard = () => {
+    Clipboard.setString(convertToHTML(pointsAmount, distanceBetweenPoints));
+    alert("link copied to clipboard!");
+  };
+
   const renderPostCreationModal = () => {
     const elapsedTime = timerStart
       ? Math.floor((currentTime - timerStart) / 1000)
       : 0;
+    const horiz = pointsAmount == 1 ? -25 : -25;
+
+    function formatTime(amount) {
+      if (amount < 60) {
+        return amount + " s"; // seconds only
+      } else {
+        let minutes = Math.floor(amount / 60);
+        let seconds = amount % 60;
+        let result = minutes + " m";
+        if (seconds > 0) {
+          result += " " + seconds + " s"; // appending seconds if there are any
+        }
+        return result;
+      }
+    }
+
+    // Example usage:
+    // console.log(formatTime(125)); // Outputs: 2 m, 5 s
     return (
       <Modal
         visible={showPostCreation}
@@ -291,13 +377,57 @@ export default function App() {
       >
         <View style={GlobalStyles.centeredView}>
           <View style={[styles.modalView, GlobalStyles.topBarShadow]}>
-            <Text>I scored {score} points!</Text>
             <Image
-              source={{ uri: "https://picsum.photos/000" }}
-              style={styles.mapImage}
+              style={{
+                width: 240,
+                height: 210,
+                marginBottom: 15,
+                zIndex: -1,
+              }}
+              source={{ uri: "https://i.imgur.com/Tfb3KaG.png" }}
             />
-            <Text>Time Elapsed: {elapsedTime} seconds</Text>
-            <Button title="Publish" onPress={handlePublish} />
+            <View>
+              <View>
+                <Text
+                  style={{
+                    position: "absolute",
+                    fontSize: 22,
+                    zIndex: 1,
+                    color: "black",
+                    marginVertical: -135,
+                    marginHorizontal: horiz,
+                    margin: 100,
+                  }}
+                >
+                  {pointsAmount} {pointsAmount == 1 ? "point" : "points"}
+                </Text>
+              </View>
+              <View>
+                <Text
+                  style={{
+                    position: "absolute",
+                    fontSize: 22,
+                    zIndex: 2,
+                    color: "black",
+                    marginVertical: -90,
+                    marginHorizontal: -25,
+                  }}
+                >
+                  {parseInt(distanceBetweenPoints)} m
+                </Text>
+              </View>
+            </View>
+            <Text>Time Elapsed: {formatTime(elapsedTime)}</Text>
+            <Text></Text>
+            <Text style={styles.createButton} onPress={handlePublish}>
+              Publish
+            </Text>
+            <Text></Text>
+            <TouchableOpacity onPress={handleCopyToClipboard}>
+              <Text style={styles.copyButton}>
+                Copy photo link to Clipboard
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -370,12 +500,13 @@ export default function App() {
       const newPost = {
         who: user.displayName,
         comment: `I scored ${score} points!`,
-        photo: "https://picsum.photos/000",
-        likes: 0,
+        photo: "https://i.imgur.com/Tfb3KaG.png",
+        points: pointsAmount,
+        meters: distanceBetweenPoints,
       };
 
       addNewPost(newPost);
-      addNotification(user.uid, "You publish post", "post");
+      addNotification(user.uid, "You publish post!", "post");
       // Logic to handle post publishing
       setShowPostCreation(false);
       restartGame();
@@ -386,11 +517,14 @@ export default function App() {
     setScore(0); // Reset the score
     setGameOver(false); // Set the game to not be over
     setIsStarted(false); // Set the game to not started
+    setDistanceBetweenPoints(100);
     // Reset other necessary states like currentLocation, endCoordinate, distance, etc.
     // You may also want to re-fetch the initial location or set a new destination here
   };
 
-  let scoreToDisplay = `numeric-${score}-box`;
+  let scoreToDisplay = `numeric-${
+    score > pointsAmount ? pointsAmount : score
+  }-box`;
   return (
     <SafeAreaView style={styles.safeArea}>
       {loading ? (
@@ -399,7 +533,11 @@ export default function App() {
         isStarted && (
           <View style={styles.container}>
             <View style={styles.gameTopBar}>
-              <View style={GlobalStyles.box}></View>
+              <View style={GlobalStyles.box} onPress={restartGame}>
+                <Text style={styles.createButton} onPress={restartGame}>
+                  X
+                </Text>
+              </View>
               <View style={GlobalStyles.box}>
                 <Text style={{ fontSize: 20 }}>{distance.toFixed(0)} m</Text>
               </View>
@@ -453,15 +591,15 @@ export default function App() {
               <TextInput
                 style={styles.input}
                 onChangeText={(text) => setDistanceBetweenPoints(Number(text))}
-                value={String(distanceBetweenPoints)}
+                value={String(distanceBetweenPoints) ?? 100}
                 keyboardType="numeric"
-                placeholder="Enter distance between points"
+                placeholder="100"
               />
               <Text>Points to earn</Text>
               <TextInput
                 style={styles.input}
                 onChangeText={(text) => setPointsAmounts(Number(text))}
-                value={String(pointsAmount)}
+                value={String(pointsAmount) ?? 1}
                 keyboardType="numeric"
                 placeholder="Enter points amount"
               />

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "PointHunters",
-    "slug": "PointHunters",
+    "slug": "pointhunters",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,11 +18,19 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#ffffff",
+        "package": "com.my.app",
+        "permissions": ["REQUEST_INSTALL_PACKAGES"]
+      },
+      "package": "com.ipiotrs.PointHunters"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f7846102-3713-46ed-a108-890c5f150e44"
+      }
     }
   }
 }

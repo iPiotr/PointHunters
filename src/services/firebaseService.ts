@@ -18,7 +18,8 @@ type Post = {
   who: string | any;
   comment: string;
   photo: string;
-  likes: number;
+  points: number;
+  meters: number;
 };
 
 const db = getDatabase();
@@ -61,11 +62,6 @@ export const addUserToDatabase = async ({
   });
 };
 
-export const addToAchievementsObject = async ({ uid }) => {
-  const newUserRef = ref(db, `user-achievements/${uid}`);
-  await set(newUserRef, {});
-};
-
 export const initializeUserRewards = async (uid, initialRewards = {}) => {
   const userRewardsRef = ref(db, `rewards/${uid}`);
 
@@ -89,9 +85,14 @@ export const fetchAchievements = (callback: Function) => {
 
 export const fetchUserAchievements = (uid, callback: Function) => {
   const achievementsRef = ref(db, `user-achievements/${uid}`);
+  console.log("====================================");
+  console.log(achievementsRef);
+  console.log("====================================");
   return onValue(achievementsRef, (snapshot) => {
-    const data = snapshot.val();
-    callback(data);
+    const achievements = snapshot.val();
+    const firstKey = Object.keys(achievements)[0]; // Get the first key of the achievements object
+    const firstAchievement = achievements[firstKey]; // Access the first achievement
+    callback(firstAchievement);
   });
 };
 
@@ -142,6 +143,24 @@ const formatDate = (date) => {
   const month = ("0" + (d.getMonth() + 1)).slice(-2);
   const year = d.getFullYear();
   return `${day}-${month}-${year}`;
+};
+
+export const addToAchievementsObject = async (uid) => {
+  const db = getDatabase();
+  const newUserRef = ref(db, `user-achievements/${uid}`);
+
+  const newAchi = {
+    0: false,
+    1: false, // Add the current date
+    2: true,
+  };
+  push(newUserRef, newAchi)
+    .then(() => {
+      console.log("Notification added successfully");
+    })
+    .catch((error) => {
+      console.error("Error adding notification:", error);
+    });
 };
 
 // Function to add a notification with the current date

@@ -24,6 +24,9 @@ const styles = StyleSheet.create({
   postPhoto: {
     width: "100%",
     height: "65%",
+    // position: "absolute",
+    // left: 1,
+    // top: 1,
   },
   desc: {
     padding: 16,

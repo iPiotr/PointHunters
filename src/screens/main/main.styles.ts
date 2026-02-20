@@ -12,11 +12,11 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   gameTopBar: {
-    marginTop: 26,
+    marginTop: 28,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 6,
+    padding: 8,
     backgroundColor: colors.lightPrimary,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   mapImage: {
-    width: 200,
-    height: 100,
+    width: 240,
+    height: 210,
     marginBottom: 15,
   },
   textInput: {

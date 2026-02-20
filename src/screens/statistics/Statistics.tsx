@@ -40,7 +40,6 @@ const Statistics: React.FC = () => {
   const [isRewardsModalVisible, setRewardsModalVisible] = useState(false);
   const [userData, setUser] = useState<UserType | null>(null);
   const { user } = useAuth();
-
   const [userAchievements, setUserAchievements] = useState([]);
 
   // const firstFourAchievements = Object.values(achievements).slice(0, 4);
@@ -98,49 +97,29 @@ const Statistics: React.FC = () => {
         </Text>
       </View>
 
-      {/* <Text style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}>
-        Rewards
-      </Text>
-
-      <View style={styles.items}>
-        {Object.values(rewards)
-          .slice(0, 2)
-          .map((reward) => (
-            <RewardItem key={reward.title} reward={reward} />
-          ))}
-        {Object.values(rewards).length > 2 && (
-          <TouchableOpacity
-            style={{ opacity: 0.5 }}
-            onPress={() => setRewardsModalVisible(true)}
-          >
-            <Text style={{ fontSize: 16, textAlign: "center" }}>
-              ... and more
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View> */}
-
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}>
           Achievements
         </Text>
         {Object.values(achievements)
-          .filter((_, index) => userAchievements[index]) // Filter based on userAchievements
-          .slice(0, 2) // Adjust this slice as per your display requirement
+          .filter((_, index) => userAchievements[index]) // Filter to include only if userAchievements[index] is true
           .map((achievement, index) => (
-            <AchievementItem
+            <View
               key={index}
-              achievement={achievement}
-              contentWidth={contentWidth}
-            />
+              style={{
+                width: contentWidth,
+                margin: 10,
+                padding: 10,
+                border: "1px solid #ccc",
+                borderRadius: 5,
+              }}
+            >
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                {achievement.title}
+              </Text>
+              <Text>{achievement.description}</Text>
+            </View>
           ))}
-        {Object.values(achievements).length > 2 && (
-          <TouchableOpacity onPress={() => setAchievementsModalVisible(true)}>
-            <Text style={{ textAlign: "center", fontSize: 16, marginTop: 14 }}>
-              show more
-            </Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
     </View>
   );

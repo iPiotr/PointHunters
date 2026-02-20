@@ -54,6 +54,7 @@ const EditField = ({ label, value, onChangeText, onSave, onCancel }) => (
     <Text style={{ fontSize: 22, fontWeight: "bold" }}>{label}</Text>
     <TextInput
       value={value}
+      // secureTextEntry={true}
       onChangeText={onChangeText}
       style={styles.changeInput}
     />
@@ -132,7 +133,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
                 value={editedEmail}
                 onChangeText={setEditedEmail}
                 onSave={() => {
-                  handleSave(editedEmail, "email");
+                  // handleSave(editedEmail, "email");
                   setIsEditingEmail(false);
                 }}
                 onCancel={() => setIsEditingEmail(false)}
@@ -150,7 +151,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
                 value={editedPassword}
                 onChangeText={setEditedPassword}
                 onSave={() => {
-                  handleSave(editedPassword, "password");
+                  // handleSave(editedPassword, "password");
                   setIsEditingPassword(false);
                 }}
                 onCancel={() => setIsEditingPassword(false)}
@@ -343,7 +344,7 @@ const ProfileOptions: React.FC<ProfileOptionsProps> = ({
       <OptionButton
         iconName="help-circle"
         label="Contact Support"
-        onPress={() => Linking.openURL("mailto:ip.starzec@gmail..com")}
+        onPress={() => Linking.openURL("mailto:ip.starzec@gmail.com")}
         // onPress={() => {
         //   setSelectedContent("Help Center");
         //   setFullScreenVisible(true);

@@ -1,24 +1,13 @@
 import React, { useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { Button, Platform, View, useColorScheme } from "react-native";
 
 import "./src/config/firebase";
 import RootNavigation from "./src/navigation";
 import { useFonts } from "expo-font";
+import { LogBox } from "react-native";
 
-import colors from "./src/utils/colors";
-
-import {
-  community,
-  notifications,
-  main,
-  statistics,
-  profile,
-} from "./src/screens";
-
-import AppNavigator from "./src/components/AppNavigator";
+LogBox.ignoreLogs(["Warning: ..."]);
+LogBox.ignoreAllLogs();
 
 const Tab = createBottomTabNavigator();
 
@@ -32,14 +21,6 @@ const App = () => {
   }
 
   return <RootNavigation />;
-
-  // return isLoggedIn ? (
-  //   <NavigationContainer>
-  //     <AppNavigator />
-  //   </NavigationContainer>
-  // ) : (
-  //   <Login onLogin={() => setIsLoggedIn(true)} />
-  // );
 };
 
 export default App;

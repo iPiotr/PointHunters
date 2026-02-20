@@ -2,7 +2,8 @@ export type Post = {
   who: string;
   comment: string;
   photo: string;
-  likes: number;
+  points: number;
+  meters: number;
 };
 
 export type Posts = Record<string, Post>;

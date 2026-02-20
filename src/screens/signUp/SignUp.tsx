@@ -17,6 +17,8 @@ import {
   updateUserById,
   addUserToDatabase,
   initializeUserRewards,
+  addNotification,
+  addToAchievementsObject,
 } from "../../services/firebaseService";
 import { StackScreenProps } from "@react-navigation/stack";
 
@@ -141,7 +143,8 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
       } catch (error) {
         console.error("Error update user:", error);
       }
-
+      addNotification(user.uid, "You created a account!", "post");
+      addToAchievementsObject(user.uid);
       console.log("User registered and profile updated:", user);
       navigation.navigate("SignIn");
     } catch (error) {

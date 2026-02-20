@@ -25,7 +25,7 @@ const Notifications: React.FC = () => {
       };
     }
   }, [user]);
-  const userNotificationsArray = Object.values(userNotifications);
+  const userNotificationsArray = Object.values(userNotifications) ?? [];
   // console.log(userNotifications);
 
   return (
